@@ -13,6 +13,8 @@ public class TestOutCodes : MonoBehaviour
     Texture2D screen;
     private float angle;
     Color defaultColour;
+    public Light light;
+    Vector3[] originalPoints;
     
 
     Renderer ourScreen;
@@ -36,34 +38,31 @@ public class TestOutCodes : MonoBehaviour
         cube[7] = new Vector3(1, -1, -1);
 
         //Cube needed for using drawCubeV2()
-        cube[0] = new Vector3(-1, 1, 1);
+        /*cube[0] = new Vector3(-1, 1, 1);
         cube[1] = new Vector3(1, 1, 1);
         cube[2] = new Vector3(-1, -1, 1);
         cube[3] = new Vector3(1, -1, 1);
         cube[4] = new Vector3(-1, 1, -1);
         cube[5] = new Vector3(1, 1, -1);
         cube[6] = new Vector3(-1, -1, -1);
-        cube[7] = new Vector3(1, -1, -1);
+        cube[7] = new Vector3(1, -1, -1);*/
 
-        Vector3[] imageAfterViewingMatrix = applyViewingMatrix(cube);
+        //Vector3[] imageAfterViewingMatrix = applyViewingMatrix(cube);
 
-        Vector3[] cubeAfterProjectionMatrix = applyProjectionMatrix(imageAfterViewingMatrix);
+       // Vector3[] cubeAfterProjectionMatrix = applyProjectionMatrix(imageAfterViewingMatrix);
 
       //  cubeAfterProjectionMatrix = applyTranslateMAtrix(cubeAfterProjectionMatrix);
 
-        imageAfterRotation = applyRotationMatrix(cubeAfterProjectionMatrix);
+        //imageAfterRotation = applyRotationMatrix(cubeAfterProjectionMatrix);
 
-        cubeAfterProjectionMatrix = divide_by_z(cubeAfterProjectionMatrix);
+        //cubeAfterProjectionMatrix = divide_by_z(cubeAfterProjectionMatrix);
 
-        Vector2 v1 = new Vector2(-1f, 1f);
-        Vector2 v2 = new Vector2(1f, -1f);    
-
-        drawCubeV2(cubeAfterProjectionMatrix, screen);
-
+       // Vector2 v1 = new Vector2(-1f, 1f);
+       // Vector2 v2 = new Vector2(1f, -1f);   
 
        // floodFill(resWidth / 2, resHeight / 2, Color.yellow, defaultColour, screen);
 
-        screen.Apply();
+        //screen.Apply();
         
     }
     private Matrix4x4 translateMatrix(Vector3 v)
@@ -101,128 +100,126 @@ public class TestOutCodes : MonoBehaviour
         return imageAfterRotation;
     }
 
-    public Vector3 calculateIfClockWiseOrAntiClockWise(Vector3 v, Vector3 u)
+    private void drawCube(Vector3[] cube)
     {
-        return Vector3.Cross(v, u).normalized;
+        //Front
+        //t1
+        drawFace(cube[0], cube[1], cube[2]);
+
+        //t2
+        drawFace(cube[0], cube[2], cube[3]);
+
+        //Right
+
+        //t1
+        drawFace(cube[4], cube[0], cube[3]);
+        //t2
+        drawFace(cube[4], cube[3], cube[7]);
+
+        //Top
+
+        //t1
+        drawFace(cube[4], cube[5], cube[1]);
+
+        //t2
+        drawFace(cube[4], cube[1], cube[0]);
+
+        //Back
+
+        //t1
+        drawFace(cube[5], cube[4], cube[7]);
+
+        //t2
+        drawFace(cube[5], cube[7], cube[6]);
+
+        //Left
+
+        //t1
+        drawFace(cube[1], cube[5], cube[6]);
+
+        //t2
+        drawFace(cube[1], cube[6], cube[2]);
+
+        //Bottom
+
+        //t1
+        drawFace(cube[6], cube[7], cube[3]);
+
+        //t2
+        drawFace(cube[6], cube[3], cube[2]);
     }
 
-    public void drawCube(Vector3[] cubeAfterProjectionMatrix, Texture2D screen)
+    public Vector3 getVectorNormal(Vector2 a, Vector2 b, Vector2 c)
     {
-        drawLine(cubeAfterProjectionMatrix[0], cubeAfterProjectionMatrix[1], screen);
-        drawLine(cubeAfterProjectionMatrix[1], cubeAfterProjectionMatrix[2], screen);
-        drawLine(cubeAfterProjectionMatrix[2], cubeAfterProjectionMatrix[3], screen);
-        drawLine(cubeAfterProjectionMatrix[3], cubeAfterProjectionMatrix[0], screen);
-
-        drawLine(cubeAfterProjectionMatrix[4], cubeAfterProjectionMatrix[5], screen);
-        drawLine(cubeAfterProjectionMatrix[5], cubeAfterProjectionMatrix[6], screen);
-        drawLine(cubeAfterProjectionMatrix[6], cubeAfterProjectionMatrix[7], screen);
-        drawLine(cubeAfterProjectionMatrix[7], cubeAfterProjectionMatrix[4], screen);
-
-        drawLine(cubeAfterProjectionMatrix[0], cubeAfterProjectionMatrix[4], screen);
-        drawLine(cubeAfterProjectionMatrix[1], cubeAfterProjectionMatrix[5], screen);
-        drawLine(cubeAfterProjectionMatrix[2], cubeAfterProjectionMatrix[6], screen);
-        drawLine(cubeAfterProjectionMatrix[3], cubeAfterProjectionMatrix[7], screen);
-
+        return Vector3.Normalize(Vector3.Cross(b - a, c - a));
     }
 
-    /*This method is for testing to try and get the floodfill to work completely
-     If this doesn't work I will just revert back to first drawCube() */
-    public void drawCubeV2(Vector3[] cube, Texture2D screen)
+    public Vector3 getLightDirection(Vector3 center)
     {
-        Vector3 frontCross = Vector3.Cross(cube[0], cube[2]);
-
-        if(frontCross.z > 0)
-        {
-            //front1
-            drawLine(cube[0], cube[3], screen);
-            drawLine(cube[3], cube[1], screen);
-            drawLine(cube[1], cube[0], screen);
-
-            //Front2
-            drawLine(cube[0], cube[2], screen);
-            drawLine(cube[2], cube[3], screen);
-            drawLine(cube[3], cube[0], screen);
-        }
-
-
-        Vector3 leftCross = Vector3.Cross(cube[4], cube[7]);
-
-        if(leftCross.z > 0)
-        {
-            //Left1
-            drawLine(cube[4], cube[2], screen);
-            drawLine(cube[2], cube[0], screen);
-            drawLine(cube[0], cube[4], screen);
-
-            //Left2
-            drawLine(cube[4], cube[6], screen);
-            drawLine(cube[6], cube[2], screen);
-            drawLine(cube[2], cube[4], screen);
-        }
-
-        Vector3 topCross = Vector3.Cross(cube[4], cube[5]);
-
-        if(topCross.z > 0)
-        {
-            //Top1
-            drawLine(cube[4], cube[0], screen);
-            drawLine(cube[0], cube[1], screen);
-            drawLine(cube[1], cube[4], screen);
-
-            //Top2
-            drawLine(cube[4], cube[1], screen);
-            drawLine(cube[1], cube[5], screen);
-            drawLine(cube[5], cube[4], screen);
-        }
-
-        Vector3 backCross = Vector3.Cross(cube[4], cube[6]);
-
-        if(backCross.z > 0)
-        {
-            //Back1
-            drawLine(cube[4], cube[5], screen);
-            drawLine(cube[5], cube[7], screen);
-            drawLine(cube[7], cube[4], screen);
-
-            //Back2
-            drawLine(cube[4], cube[7], screen);
-            drawLine(cube[7], cube[6], screen);
-            drawLine(cube[6], cube[4], screen);
-        }
-
-        Vector3 rightCross = Vector3.Cross(cube[5], cube[7]);
-
-        if(rightCross.z > 0)
-        {
-            //Right1
-            drawLine(cube[5], cube[1], screen);
-            drawLine(cube[1], cube[3], screen);
-            drawLine(cube[3], cube[5], screen);
-
-            //Right2
-            drawLine(cube[5], cube[3], screen);
-            drawLine(cube[3], cube[7], screen);
-            drawLine(cube[7], cube[5], screen);
-        }
-
-        Vector3 baseCross = Vector3.Cross(cube[6], cube[3]);
-
-        if(baseCross.z > 0)
-        {
-            //Base1
-            drawLine(cube[6], cube[3], screen);
-            drawLine(cube[3], cube[2], screen);
-            drawLine(cube[2], cube[6], screen);
-
-            //Base2
-            drawLine(cube[6], cube[7], screen);
-            drawLine(cube[7], cube[3], screen);
-            drawLine(cube[3], cube[6], screen);
-        }
-
+        return Vector3.Normalize((center - light.transform.position));
     }
 
+    public void drawFace(Vector2 i, Vector2 j, Vector2 k)
+    {
+        float z = (j.x - i.x) * (k.y - j.y) - (j.y - i.y)*(k.x - j.x);
 
+        if(z >= 0)
+        {
+            drawLine(i, j, screen);
+            drawLine(j, k, screen);
+            drawLine(k, i, screen);
+
+            Vector2 center = getCenter(i, j, k);
+            center = convertXY(center);
+            Vector3 normal = getVectorNormal(i,j,k);
+            Vector3 lightDirection = getLightDirection(center);
+            float dotProduct = Vector3.Dot(lightDirection, normal);
+            //Color reflection = new Color(dotProduct * Color.yellow.r * light.intensity, dotProduct * Color.yellow.g * light.intensity, dotProduct * Color.yellow.b * light.intensity, 1);
+            floodFillStack((int)center.x, (int)center.y, Color.yellow, defaultColour);
+        }
+    }
+
+    private void floodFillStack(int x, int y, Color newColour, Color oldColour)
+    {
+        Stack<Vector2> pixels = new Stack<Vector2>();
+        pixels.Push(new Vector2(x, y));
+
+        while(pixels.Count > 0)
+        {
+            Vector2 p = pixels.Pop();
+            if(checkBounds(p))
+            {
+                if(screen.GetPixel((int)p.x, (int)p.y) == oldColour)
+                {
+                    screen.SetPixel((int)p.x, (int)p.y, newColour);
+                    pixels.Push(new Vector2(p.x + 1, p.y));
+                    pixels.Push(new Vector2(p.x - 1, p.y));
+                    pixels.Push(new Vector2(p.x, p.y + 1));
+                    pixels.Push(new Vector2(p.x, p.y - 1));
+                }
+            }
+        }
+    }
+
+    private Vector2 getCenter(Vector2 p1, Vector2 p2, Vector2 p3)
+    {
+        return new Vector2((p1.x + p2.x + p3.x) / 3, (p1.y + p2.y + p3.y) / 3);
+    }
+
+    public bool checkBounds(Vector2 pixel)
+    {
+        if((pixel.x < 0) || (pixel.x >= resWidth - 1))
+        {
+            return false;
+        }
+
+        if((pixel.y < 0) || (pixel.y >= resHeight - 1))
+        {
+            return false;
+        }
+
+        return true;
+    }
 
     private Vector3[] applyProjectionMatrix(Vector3[] imageAfterViewingMatrix)
     {
@@ -481,10 +478,12 @@ public class TestOutCodes : MonoBehaviour
         angle += 1;
         Matrix4x4 persp = Matrix4x4.Perspective(45, 1.6f, 1, 1000);
         Matrix4x4 View = viewingMatrix(new Vector3(0, 0, 10), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
-        Matrix4x4 world = rotationMatrix(new Vector3(1, 1, 0), angle) * translateMatrix(new Vector3(2, 1, 3));;
+        Matrix4x4 world = rotationMatrix(new Vector3(1, 1, 0), angle) /* * translateMatrix(new Vector3(2, 1, 3))*/;
         Matrix4x4 overAll =persp * View*world;
+
+        originalPoints = cube;
        
-        drawCubeV2(divide_by_z(MatrixTransform(cube, overAll)), screen);
+        drawCube(divide_by_z(MatrixTransform(cube, overAll)));
 
         //floodFill(resWidth/2, resHeight/2, Color.yellow, defaultColour, screen);
 
